@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShareGate</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="brand">ShareGate <span class="tag">AI chats → team knowledge, safely</span></div>
+  <div class="who">
+    <label>Signed in as <select id="me"></select></label>
+    <span id="mode" class="pill"></span>
+  </div>
+</header>
+<nav>
+  <button data-tab="inbox" class="active">My AI chats</button>
+  <button data-tab="feed">Team feed</button>
+  <button data-tab="map">Map</button>
+  <button data-tab="ask">Ask their agent</button>
+  <button data-tab="voice">My voice</button>
+  <button data-tab="usage">Model usage</button>
+</nav>
+
+<main>
+  <section id="tab-inbox" class="tab active">
+    <div class="toolbar">
+      <button id="gate-all">Run the gate on all my chats</button>
+      <label class="upload">Import ChatGPT / Claude export <input type="file" id="import-file"></label>
+      <button id="load-demo" class="ghost">Load demo team</button>
+    </div>
+    <div class="split">
+      <ul id="inbox-list" class="list"></ul>
+      <div id="inbox-detail" class="detail"><p class="muted">Pick a chat.</p></div>
+    </div>
+  </section>
+
+  <section id="tab-feed" class="tab">
+    <div class="split">
+      <ul id="feed-list" class="list"></ul>
+      <div id="feed-detail" class="detail"><p class="muted">Pick a shared item.</p></div>
+    </div>
+  </section>
+
+  <section id="tab-map" class="tab">
+    <div id="graph"></div>
+    <p class="muted">People → what they shared → topics. Click a document to open it in the feed.</p>
+  </section>
+
+  <section id="tab-ask" class="tab">
+    <div class="ask">
+      <label>Ask <select id="ask-person"></select>'s agent</label>
+      <textarea id="ask-q" rows="3" placeholder="e.g. Why did we pick usage-based pricing? Would you be OK shipping without SSO?"></textarea>
+      <button id="ask-go">Ask</button>
+      <div id="ask-out" class="detail"></div>
+    </div>
+  </section>
+
+  <section id="tab-voice" class="tab">
+    <div class="detail" id="voice-out"></div>
+    <button id="voice-rebuild">Relearn my voice</button>
+  </section>
+
+  <section id="tab-usage" class="tab">
+    <table id="usage-table"></table>
+    <p class="muted">Nano runs on every chat (gate, re-check, topics, voice). Super picks the format and writes.
+      Ultra reads everything a person shared to answer for them.</p>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

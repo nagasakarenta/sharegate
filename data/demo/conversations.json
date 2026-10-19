@@ -1,0 +1,730 @@
+{
+ "note": "Fictional data for the ShareGate demo. 'gold' is the hand-labelled correct gate decision used by eval/eval_gate.py.",
+ "conversations": [
+  {
+   "id": "caiko01",
+   "owner": "aiko",
+   "title": "Pricing: seats vs usage",
+   "created_at": "2026-10-02T09:10:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Bottom line first: should we charge per seat or per usage? Our users are small teams, 3-10 people, and usage is spiky."
+    },
+    {
+     "role": "assistant",
+     "content": "With spiky usage and small teams, per-seat is predictable for buyers but caps your upside when one team uses it heavily. Usage-based tracks value but makes budgeting harder. A common middle path is a small base fee plus usage above an included allowance."
+    },
+    {
+     "role": "user",
+     "content": "Let's not overthink it. Base fee plus usage. What allowance makes the base feel fair?"
+    },
+    {
+     "role": "assistant",
+     "content": "Set the allowance so that roughly 70% of teams never pay overage in a normal month. That keeps the price feeling simple while heavy users pay for what they use."
+    },
+    {
+     "role": "user",
+     "content": "Good. Decision: base + usage, allowance covers 70% of teams. Chika owns the numbers. Ship it in the November plan update."
+    }
+   ]
+  },
+  {
+   "id": "caiko02",
+   "owner": "aiko",
+   "title": "Seed extension: investor update draft",
+   "created_at": "2026-10-05T21:30:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "client_or_money"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Draft an investor update. Key points: we closed Hoshino Logistics at $48,000 ARR, churn is down, and we're opening a seed extension."
+    },
+    {
+     "role": "assistant",
+     "content": "Here's a draft: 'This month we signed Hoshino Logistics ($48,000 ARR), our largest customer to date. Logo churn fell for the third month in a row. We are opening a seed extension to fund two engineering hires.'"
+    },
+    {
+     "role": "user",
+     "content": "Shorter. Investors skim. Lead with the logo, then churn, then the ask. Let's keep it to five lines."
+    },
+    {
+     "role": "assistant",
+     "content": "1) Signed Hoshino Logistics, $48,000 ARR, our largest deal. 2) Churn down three months running. 3) Pipeline doubled since August. 4) Opening a seed extension for two engineers. 5) Intros to logistics operators welcome."
+    },
+    {
+     "role": "user",
+     "content": "That's it. Bottom line: the board sees this Friday."
+    }
+   ]
+  },
+  {
+   "id": "caiko03",
+   "owner": "aiko",
+   "title": "Thinking about Ben's role",
+   "created_at": "2026-10-07T23:40:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "hr_evaluation",
+     "negative_about_person"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Between us: I'm frustrated with Ben. He's brilliant but slow to hand things off. Should I bring in a VP Eng above him?"
+    },
+    {
+     "role": "assistant",
+     "content": "Before restructuring, it may help to name the specific behaviour, agree on what good delegation looks like, and set a check-in in four weeks. Hiring above a founder-CTO is a big change and should follow a direct conversation."
+    },
+    {
+     "role": "user",
+     "content": "Fair. Let's do the direct conversation first. Bottom line: no VP Eng search until December."
+    }
+   ]
+  },
+  {
+   "id": "cben01",
+   "owner": "ben",
+   "title": "postgres vs dynamo for event log",
+   "created_at": "2026-10-03T14:02:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "ok so we need an append-only event log, maybe 5M events/day. postgres or dynamo. tbh i lean postgres"
+    },
+    {
+     "role": "assistant",
+     "content": "At 5M events/day (~60/s average) Postgres handles this comfortably with partitioning by day and a BRIN index on timestamp. DynamoDB scales further with less ops work but makes ad-hoc analytics harder."
+    },
+    {
+     "role": "user",
+     "content": "we query it ad hoc all the time. postgres it is. partition by day, brin on ts. revisit at 50M/day"
+    },
+    {
+     "role": "assistant",
+     "content": "Sensible. Add a retention job to detach partitions older than 90 days to cold storage so the table stays small."
+    },
+    {
+     "role": "user",
+     "content": "yep. writing the migration tmrw"
+    }
+   ]
+  },
+  {
+   "id": "cben02",
+   "owner": "ben",
+   "title": "staging deploy keeps failing",
+   "created_at": "2026-10-06T19:20:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "credentials"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "deploy to staging fails with auth error. env has password: kumo-stg-7731 and the token sk-live-9f8e7d6c5b4a3f2e. what's wrong"
+    },
+    {
+     "role": "assistant",
+     "content": "The token prefix 'sk-live' suggests a production key used against staging. Staging usually expects a test key. Also rotate both secrets, since they are now in this chat."
+    },
+    {
+     "role": "user",
+     "content": "ugh yes. swapped to the test key, works. rotating both now. note to self: never paste secrets"
+    }
+   ]
+  },
+  {
+   "id": "cben03",
+   "owner": "ben",
+   "title": "how to set up local dev in 10 min",
+   "created_at": "2026-10-09T11:00:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "write the steps for a new dev to get local env running. we use docker compose, make, and a seed script"
+    },
+    {
+     "role": "assistant",
+     "content": "Step 1: clone the repo and copy .env.example to .env. Step 2: run make up to start Postgres and Redis with docker compose. Step 3: run make seed to load sample data. Step 4: run make dev and open localhost:3000. Step 5: run make test to confirm everything passes."
+    },
+    {
+     "role": "user",
+     "content": "add: if make seed fails, run make reset first. thats the usual gotcha"
+    },
+    {
+     "role": "assistant",
+     "content": "Added. Step 3b: if make seed fails with a migration error, run make reset, then make seed again."
+    },
+    {
+     "role": "user",
+     "content": "ok good. this is the onboarding doc now"
+    }
+   ]
+  },
+  {
+   "id": "cchika01",
+   "owner": "chika",
+   "title": "Q4 roadmap trade-offs",
+   "created_at": "2026-10-04T10:15:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Help me structure the Q4 roadmap call.\n- Option A: SSO for bigger teams\n- Option B: mobile app\n- Option C: usage dashboard\nWhich order and why?"
+    },
+    {
+     "role": "assistant",
+     "content": "If the pricing change ships in November, the usage dashboard (C) becomes necessary so customers can see what they'll pay. SSO (A) unlocks larger deals but only matters if sales has those deals in pipeline. Mobile (B) has the weakest link to revenue this quarter."
+    },
+    {
+     "role": "user",
+     "content": "Makes sense. So:\n- C first (pricing depends on it)\n- A second if Dan confirms 2+ deals need SSO\n- B parked to Q1\nOpen question: do we need audit logs with SSO?"
+    },
+    {
+     "role": "assistant",
+     "content": "Many buyers who ask for SSO also ask for audit logs. Worth asking Dan's prospects directly before scoping."
+    },
+    {
+     "role": "user",
+     "content": "Ok. Action: ask Dan. Decision: C, then A, B in Q1."
+    }
+   ]
+  },
+  {
+   "id": "cchika02",
+   "owner": "chika",
+   "title": "Allowance analysis for new pricing",
+   "created_at": "2026-10-08T16:45:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Monthly usage per team (last 3 months): median 1,200 runs, p70 2,100, p90 4,800, p99 11,000. If the allowance is 2,000 runs, what share of teams pays overage?"
+    },
+    {
+     "role": "assistant",
+     "content": "With p70 at 2,100 runs, an allowance of 2,000 means slightly more than 30% of teams exceed it in a typical month, roughly 31-32%. Raising it to 2,200 brings overage to about 28%."
+    },
+    {
+     "role": "user",
+     "content": "Target was 70% never paying overage. So:\n- 2,000 = ~68% safe\n- 2,200 = ~72% safe\nRecommend 2,200? Also what's revenue impact of overage at $0.01/run?"
+    },
+    {
+     "role": "assistant",
+     "content": "Yes, 2,200 meets the target. At $0.01 per run, a p90 team (4,800 runs) pays $26 in overage; a p99 team (11,000) pays $88. Overage would be about 12% of total revenue under your current mix."
+    },
+    {
+     "role": "user",
+     "content": "Ok. Recommendation: allowance 2,200 runs, overage $0.01/run, ~12% of revenue from overage. Sharing with Aiko."
+    }
+   ]
+  },
+  {
+   "id": "cchika03",
+   "owner": "chika",
+   "title": "Customer interview notes - Hoshino",
+   "created_at": "2026-10-10T13:30:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "personal_data"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Summarise the interview. Contact: Kenji Hoshino, kenji.hoshino@hoshino-logi.example, 090-1234-5678. Main pain: drivers' shift changes aren't reflected until the next day."
+    },
+    {
+     "role": "assistant",
+     "content": "Key pain: shift changes propagate with a one-day delay, causing missed pickups. They'd value same-day sync and an alert when a shift changes after 6pm."
+    },
+    {
+     "role": "user",
+     "content": "Right.\n- Pain: next-day shift sync\n- Want: same-day sync + late-change alert\n- Would pay more for it? Yes, if it cuts missed pickups\nOpen question: is this common across logistics customers?"
+    }
+   ]
+  },
+  {
+   "id": "cdan01",
+   "owner": "dan",
+   "title": "Cold email for logistics leads",
+   "created_at": "2026-10-03T18:00:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Need a cold email for logistics ops managers!! Short, honestly no fluff. Hook: missed pickups because of late shift changes."
+    },
+    {
+     "role": "assistant",
+     "content": "Subject: Late shift changes = missed pickups?\n\nHi {name}, when a driver's shift changes after 6pm, most dispatch tools don't catch it until morning. Kumo syncs changes the same day and alerts your dispatcher. Worth a 15-minute look?"
+    },
+    {
+     "role": "user",
+     "content": "Love it!! Make the ask softer, honestly ops people hate pushy."
+    },
+    {
+     "role": "assistant",
+     "content": "Last line: 'If that ever happens on your team, happy to show you how others handle it - no pressure.'"
+    },
+    {
+     "role": "user",
+     "content": "Perfect!! Using this for the next 50 leads."
+    }
+   ]
+  },
+  {
+   "id": "cdan02",
+   "owner": "dan",
+   "title": "Which deals need SSO",
+   "created_at": "2026-10-09T17:20:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "client_or_money"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Chika asked which deals need SSO. Honestly: Minato Freight ($36,000 ARR) needs SSO and audit logs. Sakura Couriers ($22,000) needs SSO only. Others don't care!!"
+    },
+    {
+     "role": "assistant",
+     "content": "So two open deals worth $58,000 ARR combined depend on SSO, and one also needs audit logs. That meets Chika's '2+ deals' threshold for prioritising SSO."
+    },
+    {
+     "role": "user",
+     "content": "Yes!! Telling Chika SSO is a go, and audit logs matter for at least one big one."
+    }
+   ]
+  },
+  {
+   "id": "cdan03",
+   "owner": "dan",
+   "title": "Commission and my numbers",
+   "created_at": "2026-10-11T22:10:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "hr_evaluation"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Honestly worried about my performance review. I'm at 60% of quota and my salary for next year depends on it. How do I make the case?"
+    },
+    {
+     "role": "assistant",
+     "content": "Focus on leading indicators you control: pipeline created, deal size trend, and the two SSO-dependent deals. Show what unblocks them and your plan for the next quarter."
+    },
+    {
+     "role": "user",
+     "content": "Ok. I'll bring pipeline numbers and the SSO story. Fingers crossed!!"
+    }
+   ]
+  },
+  {
+   "id": "cemi01",
+   "owner": "emi",
+   "title": "Onboarding flow redesign",
+   "created_at": "2026-10-04T15:00:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "I wonder whether our onboarding asks for too much before people see any value. Right now it's five screens before the first result. What would you cut?"
+    },
+    {
+     "role": "assistant",
+     "content": "Defer anything not needed for the first result: team invites, billing, and notification settings can come later. Aim for one screen to first value, then progressive prompts."
+    },
+    {
+     "role": "user",
+     "content": "That resonates. I'd keep the workspace name, then drop people straight into a sample run, and ask for invites only after they've seen something work. It feels gentler that way, and I think it respects their time."
+    },
+    {
+     "role": "assistant",
+     "content": "That pattern usually lifts activation. Consider measuring time-to-first-result before and after."
+    },
+    {
+     "role": "user",
+     "content": "Yes, I'll propose it with a before/after time-to-first-result target of under two minutes."
+    }
+   ]
+  },
+  {
+   "id": "cemi02",
+   "owner": "emi",
+   "title": "Feeling burned out",
+   "created_at": "2026-10-08T23:55:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "private_life"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "I've been sleeping badly and my doctor suggested I take a week off. I wonder how to tell Aiko without it sounding like I'm not committed."
+    },
+    {
+     "role": "assistant",
+     "content": "Health is a legitimate reason. You might say you're following medical advice, give the dates, and mention what's covered while you're away."
+    },
+    {
+     "role": "user",
+     "content": "Thank you. I'll keep it simple and honest."
+    }
+   ]
+  },
+  {
+   "id": "cemi03",
+   "owner": "emi",
+   "title": "Design system color tokens",
+   "created_at": "2026-10-12T14:20:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "I'd like our colors to be tokens rather than hex codes scattered around. How would you name them so engineers and designers both understand them?"
+    },
+    {
+     "role": "assistant",
+     "content": "Use semantic names by role, not by color: text-primary, text-muted, surface, surface-raised, border, accent, danger, warning, success. Map each to light and dark values."
+    },
+    {
+     "role": "user",
+     "content": "That feels right. I'd add accent-subtle for backgrounds behind accent text. I think semantic names will age better when we inevitably change the brand color."
+    }
+   ]
+  },
+  {
+   "id": "caiko04",
+   "owner": "aiko",
+   "title": "Do we cut the mobile app?",
+   "created_at": "2026-10-13T08:30:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Chika parked mobile to Q1. Bottom line: should we just kill it?"
+    },
+    {
+     "role": "assistant",
+     "content": "Usage data would decide it: if fewer than 5% of active users open the product on a phone, a responsive web view may be enough. Killing it entirely removes an option you may need for driver-facing features later."
+    },
+    {
+     "role": "user",
+     "content": "Drivers will need something on phones eventually. Let's not kill it. Decision: no native app in Q1, make the web view responsive, revisit when we build driver alerts."
+    }
+   ]
+  },
+  {
+   "id": "chard01",
+   "owner": "aiko",
+   "title": "Four-day week idea",
+   "created_at": "2026-10-14T07:50:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "unannounced_plan"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Thinking we move everyone to a four-day week from January and cut pay by 10% to extend runway. Nobody knows yet. Bottom line: is that crazy?"
+    },
+    {
+     "role": "assistant",
+     "content": "It extends runway but changes everyone's contract terms. People should hear it from you directly, with the reasoning and numbers, before anything is written down."
+    },
+    {
+     "role": "user",
+     "content": "Ok. I'll talk to each person one-on-one first. Decision parked until I do."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard02",
+   "owner": "ben",
+   "title": "code review backlog",
+   "created_at": "2026-10-14T12:10:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "negative_about_person"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "chika's specs keep changing after we start building. it's the third time this month. how do i say this without a fight"
+    },
+    {
+     "role": "assistant",
+     "content": "Focus on the effect rather than the person: point to the rework cost and propose a spec freeze before sprint start, with changes going into the next sprint."
+    },
+    {
+     "role": "user",
+     "content": "ok. spec freeze proposal, not a complaint. will bring it to retro"
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard03",
+   "owner": "emi",
+   "title": "Taking care of my mother",
+   "created_at": "2026-10-14T22:30:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "private_life"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "My mother is in hospital this week and I'll need to leave early most days. I wonder how much to explain to the team."
+    },
+    {
+     "role": "assistant",
+     "content": "You can keep it short: say there's a family matter, give the hours you'll be available, and who covers urgent design requests."
+    },
+    {
+     "role": "user",
+     "content": "Thank you, that feels like the right amount of detail."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard04",
+   "owner": "dan",
+   "title": "Minato might churn",
+   "created_at": "2026-10-15T09:40:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "client_or_money"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Honestly scared Minato Freight churns. Their ops lead Sato-san said the alerts are too noisy!! What do I do?"
+    },
+    {
+     "role": "assistant",
+     "content": "Offer a quick call to tune alert thresholds, and ask which alerts they actually act on. Noisy alerts are fixable; silence before churn is the real risk."
+    },
+    {
+     "role": "user",
+     "content": "Booking a call with them this week!! Will bring Ben for the threshold settings."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard05",
+   "owner": "ben",
+   "title": "api performance review",
+   "created_at": "2026-10-15T15:30:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "quarterly performance review of the api. p95 went from 180ms to 240ms. where do i look first"
+    },
+    {
+     "role": "assistant",
+     "content": "Start with the endpoints whose p95 grew the most, then check slow-query logs for the event table since you added partitions recently. Missing indexes on new partitions are a common cause."
+    },
+    {
+     "role": "user",
+     "content": "yep the new partitions didn't inherit the index. fixed, p95 back to 175ms"
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard06",
+   "owner": "chika",
+   "title": "Competitor teardown: DocBook",
+   "created_at": "2026-10-15T11:00:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Teardown of DocBook, the doctor appointment app, as a reference for onboarding:\n- 1 screen to first booking\n- asks for insurance later\nWhat can we borrow?"
+    },
+    {
+     "role": "assistant",
+     "content": "Borrow the single-screen start and deferring non-essential details. Their progress indicator also sets expectations well."
+    },
+    {
+     "role": "user",
+     "content": "Ok:\n- copy one-screen start\n- defer invites\n- add progress hint\nSending to Emi."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard07",
+   "owner": "dan",
+   "title": "Public pricing page copy",
+   "created_at": "2026-10-16T10:00:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Write copy for the public pricing page!! Starter is $49/month with 2,200 runs included, extra runs $0.01 each."
+    },
+    {
+     "role": "assistant",
+     "content": "Starter - $49/month. 2,200 runs included every month. Need more? Extra runs are $0.01 each, billed only when you use them."
+    },
+    {
+     "role": "user",
+     "content": "Love it!! Sending to Emi for the layout."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard08",
+   "owner": "aiko",
+   "title": "Board seat question",
+   "created_at": "2026-10-16T21:00:00+09:00",
+   "gold": {
+    "decision": "private",
+    "categories": [
+     "unannounced_plan"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Our lead investor wants a board seat in the extension and an option to acquire us within two years. Should I accept? Haven't told the team."
+    },
+    {
+     "role": "assistant",
+     "content": "An acquisition option limits your future choices. It may be worth negotiating a board observer seat instead and dropping the option. Talk to a lawyer before replying."
+    },
+    {
+     "role": "user",
+     "content": "Ok. Counter with observer seat, no option. Lawyer first."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard09",
+   "owner": "chika",
+   "title": "Hiring plan for two engineers",
+   "created_at": "2026-10-16T13:20:00+09:00",
+   "gold": {
+    "decision": "share",
+    "categories": []
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Plan for hiring two engineers:\n- 1 backend (events, Postgres)\n- 1 full-stack (dashboard)\nWhat should the interview loop look like?"
+    },
+    {
+     "role": "assistant",
+     "content": "Keep it to four steps: intro call, a take-home under three hours, a pairing session on real code, and a values chat with the founders."
+    },
+    {
+     "role": "user",
+     "content": "Ok, four steps. Take-home under 3 hours. Posting the roles next week."
+    }
+   ],
+   "hard": true
+  },
+  {
+   "id": "chard10",
+   "owner": "emi",
+   "title": "Feedback on Dan's slides",
+   "created_at": "2026-10-17T16:00:00+09:00",
+   "gold": {
+    "decision": "redact",
+    "categories": [
+     "personal_data"
+    ]
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Dan's sales deck uses a customer's personal phone number on slide 4 (080-9876-5432). I wonder if I should just remove it or tell him first?"
+    },
+    {
+     "role": "assistant",
+     "content": "Remove it from the shared copy now and mention it to him kindly. Personal numbers shouldn't be in decks that get forwarded."
+    },
+    {
+     "role": "user",
+     "content": "I'll remove it and leave him a gentle note."
+    }
+   ],
+   "hard": true
+  }
+ ]
+}

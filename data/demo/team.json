@@ -1,0 +1,8 @@
+{"team": "Kumo Labs (fictional 5-person startup)",
+ "people": [
+  {"id": "aiko", "name": "Aiko Tanaka", "role": "CEO"},
+  {"id": "ben", "name": "Ben Carter", "role": "CTO"},
+  {"id": "chika", "name": "Chika Mori", "role": "Product Manager"},
+  {"id": "dan", "name": "Dan Okafor", "role": "Sales"},
+  {"id": "emi", "name": "Emi Sato", "role": "Designer"}
+ ]}

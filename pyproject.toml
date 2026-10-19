@@ -1,0 +1,16 @@
+[project]
+name = "sharegate"
+version = "0.1.0"
+description = "Turn AI chats into team knowledge, safely. Built on NVIDIA Nemotron via Nebius Token Factory."
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.30",
+  "openai>=1.40",
+  "python-dotenv>=1.0",
+  "python-multipart>=0.0.9",
+]
+
+[tool.uv]
+package = false
