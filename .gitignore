@@ -6,3 +6,4 @@ sharegate.db
 artifacts/
 !artifacts/.keep
 eval/results*.json
+設計メモ.md
