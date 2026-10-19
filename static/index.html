@@ -1,75 +1,115 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ShareGate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
 </head>
 <body>
-<header>
-  <div class="brand">ShareGate <span class="tag">AI chats → team knowledge, safely</span></div>
-  <div class="who">
-    <label>Signed in as <select id="me"></select></label>
-    <span id="mode" class="pill"></span>
-  </div>
-</header>
-<nav>
-  <button data-tab="inbox" class="active">My AI chats</button>
-  <button data-tab="feed">Team feed</button>
-  <button data-tab="map">Map</button>
-  <button data-tab="ask">Ask their agent</button>
-  <button data-tab="voice">My voice</button>
-  <button data-tab="usage">Model usage</button>
-</nav>
-
-<main>
-  <section id="tab-inbox" class="tab active">
-    <div class="toolbar">
-      <button id="gate-all">Run the gate on all my chats</button>
-      <label class="upload">Import ChatGPT / Claude export <input type="file" id="import-file"></label>
-      <button id="load-demo" class="ghost">Load demo team</button>
+<div class="app">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div>
+      <div><div class="logo-name">ShareGate</div><div class="logo-sub">AI chats → team knowledge</div></div>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
     </div>
-    <div class="split">
-      <ul id="inbox-list" class="list"></ul>
-      <div id="inbox-detail" class="detail"><p class="muted">Pick a chat.</p></div>
+
+    <nav class="nav">
+      <button data-tab="inbox" class="active"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>My AI chats<span class="count" id="count-inbox"></span></button>
+      <button data-tab="feed"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Team feed<span class="count" id="count-feed"></span></button>
+      <button data-tab="map"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="10" cy="18" r="2.5"/><path d="m8 7 8 1M7.5 8 9.5 16M16.5 10l-5 6.5"/></svg>Knowledge map</button>
+      <button data-tab="ask"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.1V19a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-2.9A7 7 0 0 1 12 3Z"/><path d="M9.5 22h5"/></svg>Ask their agent</button>
+      <button data-tab="voice"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>My voice</button>
+      <button data-tab="usage"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Model usage</button>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="engine" id="engine"><span class="dot"></span><span id="engine-text">…</span></div>
+      <label class="me-label">Signed in as</label>
+      <div class="me"><div class="avatar" id="me-avatar">?</div><select id="me"></select></div>
     </div>
-  </section>
+  </aside>
 
-  <section id="tab-feed" class="tab">
-    <div class="split">
-      <ul id="feed-list" class="list"></ul>
-      <div id="feed-detail" class="detail"><p class="muted">Pick a shared item.</p></div>
-    </div>
-  </section>
+  <main class="main">
+    <!-- INBOX -->
+    <section id="tab-inbox" class="tab active">
+      <header class="page-head">
+        <div><h1>My AI chats</h1><p>Everything you talked through with AI. The gate decides what's safe to share.</p></div>
+        <div class="head-actions">
+          <label class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg>Import<input type="file" id="import-file" hidden></label>
+          <button class="btn btn-ghost" id="load-demo">Load demo team</button>
+          <button class="btn btn-primary" id="gate-all"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/></svg>Run the gate</button>
+        </div>
+      </header>
+      <div class="stats" id="inbox-stats"></div>
+      <div class="split">
+        <div class="list-wrap"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="inbox-search" placeholder="Search chats"></div><ul id="inbox-list" class="list"></ul></div>
+        <div id="inbox-detail" class="panel detail"></div>
+      </div>
+    </section>
 
-  <section id="tab-map" class="tab">
-    <div id="graph"></div>
-    <p class="muted">People → what they shared → topics. Click a document to open it in the feed.</p>
-  </section>
+    <!-- FEED -->
+    <section id="tab-feed" class="tab">
+      <header class="page-head">
+        <div><h1>Team feed</h1><p>What your teammates chose to share, ranked by votes and freshness.</p></div>
+        <div class="head-actions" id="feed-filters"></div>
+      </header>
+      <div class="split">
+        <div class="list-wrap"><ul id="feed-list" class="list"></ul></div>
+        <div id="feed-detail" class="panel detail"></div>
+      </div>
+    </section>
 
-  <section id="tab-ask" class="tab">
-    <div class="ask">
-      <label>Ask <select id="ask-person"></select>'s agent</label>
-      <textarea id="ask-q" rows="3" placeholder="e.g. Why did we pick usage-based pricing? Would you be OK shipping without SSO?"></textarea>
-      <button id="ask-go">Ask</button>
-      <div id="ask-out" class="detail"></div>
-    </div>
-  </section>
+    <!-- MAP -->
+    <section id="tab-map" class="tab">
+      <header class="page-head">
+        <div><h1>Knowledge map</h1><p>People → what they shared → topics. Click a document to open it.</p></div>
+        <div class="legend" id="map-legend"></div>
+      </header>
+      <div id="graph" class="panel"></div>
+    </section>
 
-  <section id="tab-voice" class="tab">
-    <div class="detail" id="voice-out"></div>
-    <button id="voice-rebuild">Relearn my voice</button>
-  </section>
+    <!-- ASK -->
+    <section id="tab-ask" class="tab">
+      <header class="page-head">
+        <div><h1>Ask their agent</h1><p>Answers come only from chats that person chose to share — with sources.</p></div>
+      </header>
+      <div class="chat panel">
+        <div class="chat-top"><span class="muted">Talking to</span><div class="me"><div class="avatar" id="ask-avatar">?</div><select id="ask-person"></select></div><span class="pill pill-ultra" id="ask-engine"></span></div>
+        <div id="chat-log" class="chat-log"></div>
+        <div class="suggest" id="suggest"></div>
+        <form id="ask-form" class="composer">
+          <textarea id="ask-q" rows="1" placeholder="Ask what they think… e.g. Why did we pick base fee plus usage?"></textarea>
+          <button class="btn btn-primary btn-icon" type="submit" title="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        </form>
+      </div>
+    </section>
 
-  <section id="tab-usage" class="tab">
-    <table id="usage-table"></table>
-    <p class="muted">Nano runs on every chat (gate, re-check, topics, voice). Super picks the format and writes.
-      Ultra reads everything a person shared to answer for them.</p>
-  </section>
-</main>
+    <!-- VOICE -->
+    <section id="tab-voice" class="tab">
+      <header class="page-head">
+        <div><h1>My voice</h1><p>Shared documents are written the way you write — not the way AI writes.</p></div>
+        <div class="head-actions"><button class="btn btn-ghost" id="voice-rebuild">Relearn my voice</button></div>
+      </header>
+      <div id="voice-out"></div>
+    </section>
+
+    <!-- USAGE -->
+    <section id="tab-usage" class="tab">
+      <header class="page-head">
+        <div><h1>Model usage</h1><p>Right-sized Nemotron models on Nebius Token Factory.</p></div>
+      </header>
+      <div class="tiers" id="tiers"></div>
+    </section>
+  </main>
+</div>
+<div id="toasts" class="toasts"></div>
 <script src="app.js"></script>
 </body>
 </html>
