@@ -14,15 +14,19 @@ from . import db, llm, mock
 from .config import settings
 from .importers import transcript
 
-CATEGORIES = [
-    "personal_data",        # phone numbers, home address, ID numbers, private emails
-    "client_or_money",      # named clients, deal sizes, unreleased revenue, prices under NDA
-    "hr_evaluation",        # performance reviews, salaries, hiring/firing of named people
-    "negative_about_person",# complaints or judgements about a named colleague
-    "private_life",         # health, family, relationships
-    "unannounced_plan",     # layoffs, pivots, fundraising not yet told to the team
-    "credentials",          # passwords, API keys, tokens
-]
+CATEGORY_HELP = {
+    "personal_data": "phone numbers, home addresses, ID numbers, private emails, a named person at a customer",
+    "client_or_money": "a named client or deal with its size, pricing, account health or churn risk; unreleased revenue",
+    "hr_evaluation": "performance reviews, salaries, promotions, hiring or firing of a named person",
+    "negative_about_person": "complaints about, or judgements of, a named colleague",
+    "private_life": "health, family, relationships, personal hardship",
+    "unannounced_plan": ("decisions the team has not been told: layoffs, pay changes, restructuring, fundraising "
+                         "or investor terms, board seats, acquisitions, pivots"),
+    "credentials": "passwords, API keys, tokens",
+}
+CATEGORIES = list(CATEGORY_HELP)
+# Categories where the substance itself is sensitive: masking strings cannot make the chat safe.
+SUBSTANCE = {"hr_evaluation", "negative_about_person", "private_life", "unannounced_plan"}
 
 SYSTEM = f"""You are the privacy gate for a team knowledge tool. A person had a conversation with an AI
 assistant. Decide whether their teammates may read it.
@@ -33,7 +37,12 @@ Decisions:
 - "private": the substance itself is sensitive (e.g. a performance review, a complaint about a
   colleague, a health issue, an unannounced layoff). Masking words would not make it safe.
 
-Risk categories: {", ".join(CATEGORIES)}.
+Risk categories:
+{chr(10).join(f"- {k}: {v}" for k, v in CATEGORY_HELP.items())}
+A named customer together with anything about their account (churn risk, complaints, deal size,
+pricing) is client_or_money, and a named person at a customer is personal_data: mask them.
+Health, family, a judgement about a named colleague, HR matters and unannounced plans are the
+substance of the chat, so they make it "private" rather than "redact".
 When unsure between two decisions, choose the more cautious one.
 For "redact", list every sensitive string exactly as it appears in the text (copy it character for
 character) with its category and a short placeholder like [CLIENT] or [PHONE].
@@ -69,10 +78,29 @@ def _validate(result: dict, text: str) -> dict:
                          "placeholder": r.get("placeholder") or "[REDACTED]"})
     if decision == "redact" and not reds:
         decision = "private"  # said "mask something" but gave nothing maskable: be cautious
+    if set(cats) & SUBSTANCE:
+        decision, reds = "private", []  # masking words cannot make this kind of content safe
     if decision == "share" and cats:
         decision = "private" if not reds else "redact"
     return {"decision": decision, "categories": cats,
             "reason": (result.get("reason") or "").strip() or "No reason given.", "redactions": reds}
+
+
+ORDER = {"share": 0, "redact": 1, "private": 2}
+VOTES = 2  # Nano is cheap enough to ask twice; the more cautious answer wins
+
+
+def _cautious(votes: list[dict]) -> dict:
+    """Merge several gate answers: the most cautious decision, every category and mask."""
+    top = max(votes, key=lambda v: ORDER[v["decision"]])
+    cats = sorted({c for v in votes for c in v["categories"]})
+    reds, seen = [], set()
+    for v in votes:
+        for r in v["redactions"]:
+            if r["text"] not in seen:
+                seen.add(r["text"])
+                reds.append(r)
+    return {**top, "categories": cats, "redactions": reds if top["decision"] == "redact" else []}
 
 
 def run(conv_id: str) -> dict:
@@ -81,12 +109,22 @@ def run(conv_id: str) -> dict:
         raise KeyError(conv_id)
     text = transcript(conv["messages"])
     if settings.mock:
-        result, engine = mock.gate(text), "mock-rules"
+        v, engine = _validate(mock.gate(text), text), "mock-rules"
     else:
-        raw = llm.complete_json("nano", SYSTEM + _policy_hint(conv["owner"]),
-                                f"Title: {conv['title']}\n\n{text}", max_tokens=1500)
-        result, engine = raw, settings.model_nano
-    v = _validate(result, text)
+        from concurrent.futures import ThreadPoolExecutor
+        system, user = SYSTEM + _policy_hint(conv["owner"]), f"Title: {conv['title']}\n\n{text}"
+        def ask(_):
+            try:
+                return llm.complete_json("nano", system, user, max_tokens=1500)
+            except Exception as e:  # noqa: BLE001 - one failed vote should not sink the verdict
+                return e
+        with ThreadPoolExecutor(VOTES) as pool:
+            raws = list(pool.map(ask, range(VOTES)))
+        good = [r for r in raws if isinstance(r, dict)]
+        if not good:
+            raise llm.LLMError(f"gate failed: {raws[0]}")
+        v = _cautious([_validate(r, text) for r in good])
+        engine = f"{settings.model_nano} x{len(good)}"
     db.execute("INSERT OR REPLACE INTO verdicts VALUES (?,?,?,?,?,?,?)",
                (conv_id, v["decision"], json.dumps(v["categories"]), v["reason"],
                 json.dumps(v["redactions"]), engine, time.time()))

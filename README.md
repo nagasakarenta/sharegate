@@ -36,11 +36,13 @@ And when someone does paste AI output into Slack, nobody reads it: it doesn't so
 `eval/eval_gate.py` scores the gate on 26 hand-labelled demo chats (10 of them deliberately tricky:
 sensitive content without obvious keywords, and harmless text full of scary keywords).
 The key number is **leaks**: chats that should have been masked or kept private but were let through.
+The gate asks Nano twice in parallel and keeps the more cautious answer; at Nano prices that still costs a fraction of a cent per chat.
 
 | Engine | Exact match | Leaks | Over-blocked |
 |---|---|---|---|
 | Keyword rules (baseline) | 17/26 | 5 | 4 |
-| Nemotron 3 Nano | _to be filled_ | | |
+| Nemotron 3 Nano, one call | 24/26 | 2 | 0 |
+| Nemotron 3 Nano, two votes + category guide (current) | 24-25/26 (two runs) | **0** | 1-2 |
 
 ## Run it
 ```bash
