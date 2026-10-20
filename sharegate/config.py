@@ -16,9 +16,9 @@ load_dotenv(ROOT / ".env")
 class Settings:
     api_key: str = os.getenv("NEBIUS_API_KEY", "").strip()
     base_url: str = os.getenv("NEBIUS_BASE_URL", "https://api.tokenfactory.nebius.com/v1")
-    model_nano: str = os.getenv("MODEL_NANO", "nvidia/nemotron-3-nano-30b-a3b")
+    model_nano: str = os.getenv("MODEL_NANO", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B")
     model_super: str = os.getenv("MODEL_SUPER", "nvidia/nemotron-3-super-120b-a12b")
-    model_ultra: str = os.getenv("MODEL_ULTRA", "nvidia/nemotron-3-ultra-550b-a55b")
+    model_ultra: str = os.getenv("MODEL_ULTRA", "nvidia/Nemotron-3-Ultra-550b-a55b")
     chrome_path: str = os.getenv(
         "CHROME_PATH", "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
     )
