@@ -55,11 +55,16 @@ def people():
 
 
 @app.post("/api/import")
-async def import_file(owner: str = Form(...), file: UploadFile = File(...)):
-    if not db.one("SELECT 1 FROM people WHERE id=?", (owner,)):
-        db.execute("INSERT INTO people VALUES (?,?,?)", (owner, owner, ""))
+async def import_file(owner: str = Form(...), file: UploadFile = File(...),
+                      name: str = Form(""), role: str = Form("")):
     convs = importers.parse(await file.read(), owner=owner, filename=file.filename or "")
-    return {"imported": _store(convs)}
+    convs = [c for c in convs if c["messages"]]
+    if not convs:
+        raise HTTPException(422, "No conversations found in that file. Use conversations.json from a ChatGPT or Claude export.")
+    existing = db.one("SELECT * FROM people WHERE id=?", (owner,))
+    db.execute("INSERT OR REPLACE INTO people VALUES (?,?,?)",
+               (owner, name.strip() or (existing or {}).get("name") or owner, role.strip() or (existing or {}).get("role", "")))
+    return {"imported": _store(convs), "owner": owner}
 
 
 @app.get("/api/inbox/{person}")

@@ -49,6 +49,7 @@ $("#theme-toggle").onclick = () => {
 $("#lang-toggle").onclick = () => {
   LANG = LANG === "en" ? "ja" : "en"; store.set("sg-lang", LANG);
   applyStatic(); setEngine(); $("#chat-log").innerHTML = "";
+  if (typeof OB !== "undefined") OB.renderChecklist();
   delete $("#inbox-detail").dataset.id; delete $("#feed-detail").dataset.id;
   showTab(CURRENT_TAB);
 };
@@ -92,6 +93,7 @@ async function loadInbox() {
   INBOX = await api(`/api/inbox/${encodeURIComponent(ME)}`);
   $("#count-inbox").textContent = INBOX.length || "";
   renderStats(); renderInbox();
+  if (typeof OB !== "undefined") OB.syncFromState();
   const open = $("#inbox-detail").dataset.id;
   if (open && INBOX.some((c) => c.id === open)) openChat(open);
   else $("#inbox-detail").innerHTML = empty(ICON.shield, t("empty.pick"), t("empty.pick.sub"));
@@ -139,6 +141,7 @@ async function openChat(id) {
   $("#inbox-detail").dataset.id = id; renderInbox();
   const c = await api(`/api/conversation/${id}`), v = c.verdict, row = INBOX.find((x) => x.id === id);
   let dec = v?.decision || "", fmt = "";
+  if (v?.decision === "redact") obMark("mask");
   const segDec = DECS.map((k) => `<button data-dec="${k}" class="${k === dec ? "on" : ""}">${t("decs." + k)}</button>`).join("");
   const segFmt = `<button data-fmt="" class="on">${ICON.spark}${t("fmt.auto")}</button>` + FMTS.map((k) => `<button data-fmt="${k}">${fmtName(k)}</button>`).join("");
   $("#inbox-detail").innerHTML = `
@@ -162,7 +165,7 @@ async function openChat(id) {
   $$("#seg-fmt button").forEach((b) => (b.onclick = () => { fmt = b.dataset.fmt; $$("#seg-fmt button").forEach((x) => x.classList.toggle("on", x === b)); }));
   $("#btn-gate").onclick = async () => {
     $("#btn-gate").disabled = true;
-    try { await api(`/api/gate/${id}`, { method: "POST" }); await loadInbox(); }
+    try { await api(`/api/gate/${id}`, { method: "POST" }); obMark("gate"); await loadInbox(); }
     catch (e) { toast(e.message, true); $("#btn-gate").disabled = false; }
   };
   $("#btn-share").onclick = () => runShare(id, v, dec, fmt);
@@ -186,7 +189,7 @@ async function runShare(id, v, dec, fmt) {
       <div style="display:flex;gap:10px;align-items:center">${fmtBadge(r.format)}<div><b>${esc(r.title)}</b><div class="muted">${fmtName(r.format)} — ${esc(r.why)}</div></div>
       <a class="btn btn-sm" style="margin-left:auto" href="/api/artifact/${id}" target="_blank">${t("open")} ${ICON.ext}</a></div>
       <div style="margin-top:8px">${r.topics.map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div></div>`);
-    toast(t("toast.shared"));
+    toast(t("toast.shared")); obMark("share");
     INBOX = await api(`/api/inbox/${encodeURIComponent(ME)}`); renderStats(); renderInbox();
   } catch (e) {
     clearInterval(timer);
@@ -199,7 +202,7 @@ async function runShare(id, v, dec, fmt) {
 $("#gate-all").onclick = async () => {
   if (!ME) return toast(t("toast.loaddemo"), true);
   const b = $("#gate-all"); b.disabled = true; $("#gate-all-label").textContent = t("btn.checking");
-  try { const r = await api(`/api/gate-all/${encodeURIComponent(ME)}`, { method: "POST" }); toast(t("toast.checked", { n: Object.keys(r).length })); }
+  try { const r = await api(`/api/gate-all/${encodeURIComponent(ME)}`, { method: "POST" }); toast(t("toast.checked", { n: Object.keys(r).length })); obMark("gate"); }
   catch (e) { toast(e.message, true); }
   b.disabled = false; $("#gate-all-label").textContent = t("btn.gate"); loadInbox();
 };
@@ -311,6 +314,7 @@ $("#ask-form").onsubmit = async (e) => {
     $(".bubble", row).innerHTML = `${label}${marked.parse(r.answer)}
       <div class="sources">${r.citations.length ? t("ask.sources") : t("ask.nosource")} ${r.citations.map((c) => `<span class="chip">${esc(c.title)}</span>`).join("")}
       <span class="mono">· ${esc(r.engine)}</span></div>`;
+    obMark("ask");
   } catch (err) { $(".bubble", row).innerHTML = `<span style="color:var(--private)">${esc(err.message)}</span>`; }
   row.scrollIntoView({ behavior: "smooth" });
 };
@@ -348,7 +352,8 @@ async function loadUsage() {
 }
 
 // ---------- boot ----------
-(async () => {
+const obMark = (k) => (typeof OB !== "undefined" ? OB.mark(k) : null);
+window.SG_READY = (async () => {
   applyStatic();
   STATUS = await api("/api/status");
   setEngine();
