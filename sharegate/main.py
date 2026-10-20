@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -117,6 +117,41 @@ def do_share(conv_id: str, req: ShareReq):
         raise HTTPException(502, str(e))
 
 
+def _sse(event: str, data) -> str:
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
+@app.post("/api/share/{conv_id}/stream")
+def do_share_stream(conv_id: str, req: ShareReq):
+    """Same as /api/share but reports each pipeline step as a server-sent event."""
+    import queue
+    import threading
+
+    q: queue.Queue = queue.Queue()
+
+    def work():
+        try:
+            result = share.share(conv_id, req.decision, req.format, progress=lambda step: q.put(("step", {"step": step})))
+            q.put(("done", result))
+        except share.Blocked as e:
+            q.put(("error", {"detail": str(e), "kind": "blocked"}))
+        except Exception as e:  # noqa: BLE001 - reported to the client as an event
+            q.put(("error", {"detail": str(e), "kind": "failed"}))
+        q.put(None)
+
+    threading.Thread(target=work, daemon=True).start()
+
+    def gen():
+        while True:
+            item = q.get()
+            if item is None:
+                return
+            yield _sse(*item)
+
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
 @app.delete("/api/share/{conv_id}")
 def undo_share(conv_id: str):
     share.unshare(conv_id)
@@ -176,6 +211,20 @@ def ask(req: AskReq):
         return knowledge.ask(req.person, req.question)
     except llm.LLMError as e:
         raise HTTPException(502, str(e))
+
+
+@app.post("/api/ask/stream")
+def ask_stream(req: AskReq):
+    def gen():
+        try:
+            for kind, payload in knowledge.ask_stream(req.person, req.question):
+                yield _sse(kind, payload)
+        except KeyError:
+            yield _sse("error", {"detail": "unknown person"})
+        except llm.LLMError as e:
+            yield _sse("error", {"detail": str(e)})
+    return StreamingResponse(gen(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/api/usage")
