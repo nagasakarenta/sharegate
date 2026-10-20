@@ -72,8 +72,13 @@ def build(owner: str) -> dict:
     if not lines:
         return {}
     sample = "\n---\n".join(lines[-80:])[:30000]
-    profile = _mock_profile(lines) if settings.mock else llm.complete_json(
-        "nano", SYSTEM, sample, max_tokens=900)
+    if settings.mock:
+        profile = _mock_profile(lines)
+    else:
+        try:
+            profile = llm.complete_json("nano", SYSTEM, sample, max_tokens=3000)
+        except llm.LLMError:
+            profile = _mock_profile(lines)  # a style hint is optional; never block sharing on it
     # Anything verbatim (example lines, stock phrases) must come from chats already shared,
     # so a private chat can shape the style but never surface its words.
     shared_lines = _user_lines(owner, shared_only=True)

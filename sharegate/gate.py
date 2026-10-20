@@ -8,6 +8,7 @@ overrides are fed back in so the gate learns their personal line.
 from __future__ import annotations
 
 import json
+import re
 import time
 
 from . import db, llm, mock
@@ -142,7 +143,10 @@ def apply_redactions(messages: list[dict], redactions: list[dict]) -> list[dict]
 
 
 RECHECK_SYSTEM = """You check a document just before it is shown to a team. It was generated from a
-conversation in which some strings were masked. Report whether the document still contains anything
+conversation in which some strings were masked with bracketed placeholders such as [CLIENT] or [AMOUNT].
+Placeholders are already safe: never report them. Teammates' names, who owns which task, product
+decisions, public prices and general numbers are normal team information: do not report them either.
+Report only what a careful colleague would not want forwarded. Report whether the document still contains anything
 sensitive: any of the masked strings, or new personal data, client names with deal sizes, HR
 judgements about a named person, credentials, or private-life details.
 JSON shape: {"ok": true|false, "problems": ["..."]}"""
@@ -159,5 +163,7 @@ def recheck(document: str, redactions: list[dict]) -> dict:
     masked = ", ".join(r["placeholder"] for r in redactions) or "none"
     res = llm.complete_json("nano", RECHECK_SYSTEM,
                             f"Placeholders already used: {masked}\n\nDOCUMENT:\n{document[:40000]}",
-                            max_tokens=600)
-    return {"ok": bool(res.get("ok")), "problems": res.get("problems") or [], "engine": settings.model_nano}
+                            max_tokens=1500)
+    problems = [p for p in res.get("problems") or []
+                if isinstance(p, str) and not re.fullmatch(r"\s*(\[[A-Z_ ]+\][\s;,]*)+", p)]
+    return {"ok": not problems, "problems": problems, "engine": settings.model_nano}

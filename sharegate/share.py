@@ -37,7 +37,10 @@ def share(conv_id: str, user_decision: str | None = None, fmt_override: str | No
     db.execute("INSERT OR REPLACE INTO shares VALUES (?,?,?,?,?,?,?,?,?)",
                (conv_id, conv["owner"], choice["title"], fmt, choice.get("why", ""), art["path"],
                 json.dumps(tags), json.dumps(check), time.time()))
-    voice.build(conv["owner"])  # a new shared chat can add example lines to the voice
+    try:
+        voice.build(conv["owner"])  # a new shared chat can add example lines to the voice
+    except Exception:  # noqa: BLE001 - the document is already published
+        pass
     return {"conv_id": conv_id, "format": fmt, "title": choice["title"], "why": choice.get("why", ""),
             "artifact": art["path"], "topics": tags, "recheck": check}
 
