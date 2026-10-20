@@ -6,7 +6,7 @@
 <title>ShareGate</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.2/cytoscape.min.js"></script>
@@ -16,48 +16,47 @@
   <aside class="sidebar">
     <div class="logo">
       <div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></div>
-      <div><div class="logo-name">ShareGate</div><div class="logo-sub">AI chats → team knowledge</div></div>
-      <button class="theme-toggle" id="theme-toggle" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
+      <div><div class="logo-name">ShareGate</div><div class="logo-sub" data-i18n="logo.sub"></div></div>
+      <button class="theme-toggle" id="theme-toggle" data-i18n-title="theme.toggle"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></button>
     </div>
 
     <nav class="nav">
-      <button data-tab="inbox" class="active"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>My AI chats<span class="count" id="count-inbox"></span></button>
-      <button data-tab="feed"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Team feed<span class="count" id="count-feed"></span></button>
-      <button data-tab="map"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="10" cy="18" r="2.5"/><path d="m8 7 8 1M7.5 8 9.5 16M16.5 10l-5 6.5"/></svg>Knowledge map</button>
-      <button data-tab="ask"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.1V19a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-2.9A7 7 0 0 1 12 3Z"/><path d="M9.5 22h5"/></svg>Ask their agent</button>
-      <button data-tab="voice"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>My voice</button>
-      <button data-tab="usage"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Model usage</button>
+      <button data-tab="inbox" class="active"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span data-i18n="nav.inbox"></span><span class="count" id="count-inbox"></span></button>
+      <button data-tab="feed"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg><span data-i18n="nav.feed"></span><span class="count" id="count-feed"></span></button>
+      <button data-tab="map"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="10" cy="18" r="2.5"/><path d="m8 7 8 1M7.5 8 9.5 16M16.5 10l-5 6.5"/></svg><span data-i18n="nav.map"></span></button>
+      <button data-tab="ask"><svg viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 1 7 7c0 2.6-1.4 4.9-3.5 6.1V19a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1v-2.9A7 7 0 0 1 12 3Z"/><path d="M9.5 22h5"/></svg><span data-i18n="nav.ask"></span></button>
+      <button data-tab="voice"><svg viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 1 1-6 0V6a3 3 0 0 1 3-3Z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg><span data-i18n="nav.voice"></span></button>
+      <button data-tab="usage"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i18n="nav.usage"></span></button>
     </nav>
 
     <div class="sidebar-foot">
+      <button class="lang-toggle" id="lang-toggle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z"/></svg><span data-i18n="lang.toggle"></span></button>
       <div class="engine" id="engine"><span class="dot"></span><span id="engine-text">…</span></div>
-      <label class="me-label">Signed in as</label>
+      <label class="me-label" data-i18n="me.label"></label>
       <div class="me"><div class="avatar" id="me-avatar">?</div><select id="me"></select></div>
     </div>
   </aside>
 
   <main class="main">
-    <!-- INBOX -->
     <section id="tab-inbox" class="tab active">
       <header class="page-head">
-        <div><h1>My AI chats</h1><p>Everything you talked through with AI. The gate decides what's safe to share.</p></div>
+        <div><h1 data-i18n="inbox.title"></h1><p data-i18n="inbox.sub"></p></div>
         <div class="head-actions">
-          <label class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg>Import<input type="file" id="import-file" hidden></label>
-          <button class="btn btn-ghost" id="load-demo">Load demo team</button>
-          <button class="btn btn-primary" id="gate-all"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/></svg>Run the gate</button>
+          <label class="btn btn-ghost"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 21h14"/></svg><span data-i18n="btn.import"></span><input type="file" id="import-file" hidden></label>
+          <button class="btn btn-ghost" id="load-demo" data-i18n="btn.demo"></button>
+          <button class="btn btn-primary" id="gate-all"><svg viewBox="0 0 24 24"><path d="M12 2 4 6v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10V6l-8-4Z"/></svg><span id="gate-all-label" data-i18n="btn.gate"></span></button>
         </div>
       </header>
       <div class="stats" id="inbox-stats"></div>
       <div class="split">
-        <div class="list-wrap"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="inbox-search" placeholder="Search chats"></div><ul id="inbox-list" class="list"></ul></div>
+        <div class="list-wrap"><div class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="inbox-search" data-i18n-ph="search.chats"></div><ul id="inbox-list" class="list"></ul></div>
         <div id="inbox-detail" class="panel detail"></div>
       </div>
     </section>
 
-    <!-- FEED -->
     <section id="tab-feed" class="tab">
       <header class="page-head">
-        <div><h1>Team feed</h1><p>What your teammates chose to share, ranked by votes and freshness.</p></div>
+        <div><h1 data-i18n="feed.title"></h1><p data-i18n="feed.sub"></p></div>
         <div class="head-actions" id="feed-filters"></div>
       </header>
       <div class="split">
@@ -66,50 +65,47 @@
       </div>
     </section>
 
-    <!-- MAP -->
     <section id="tab-map" class="tab">
       <header class="page-head">
-        <div><h1>Knowledge map</h1><p>People → what they shared → topics. Click a document to open it.</p></div>
+        <div><h1 data-i18n="map.title"></h1><p data-i18n="map.sub"></p></div>
         <div class="legend" id="map-legend"></div>
       </header>
       <div id="graph" class="panel"></div>
     </section>
 
-    <!-- ASK -->
     <section id="tab-ask" class="tab">
       <header class="page-head">
-        <div><h1>Ask their agent</h1><p>Answers come only from chats that person chose to share — with sources.</p></div>
+        <div><h1 data-i18n="ask.title"></h1><p data-i18n="ask.sub"></p></div>
       </header>
       <div class="chat panel">
-        <div class="chat-top"><span class="muted">Talking to</span><div class="me"><div class="avatar" id="ask-avatar">?</div><select id="ask-person"></select></div><span class="pill pill-ultra" id="ask-engine"></span></div>
+        <div class="chat-top"><span class="muted" data-i18n="ask.talking"></span><div class="me"><div class="avatar" id="ask-avatar">?</div><select id="ask-person"></select></div><span class="pill pill-ultra" id="ask-engine"></span></div>
         <div id="chat-log" class="chat-log"></div>
         <div class="suggest" id="suggest"></div>
         <form id="ask-form" class="composer">
-          <textarea id="ask-q" rows="1" placeholder="Ask what they think… e.g. Why did we pick base fee plus usage?"></textarea>
-          <button class="btn btn-primary btn-icon" type="submit" title="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+          <textarea id="ask-q" rows="1" data-i18n-ph="ask.ph"></textarea>
+          <button class="btn btn-primary btn-icon" type="submit" data-i18n-title="send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
         </form>
       </div>
     </section>
 
-    <!-- VOICE -->
     <section id="tab-voice" class="tab">
       <header class="page-head">
-        <div><h1>My voice</h1><p>Shared documents are written the way you write — not the way AI writes.</p></div>
-        <div class="head-actions"><button class="btn btn-ghost" id="voice-rebuild">Relearn my voice</button></div>
+        <div><h1 data-i18n="voice.title"></h1><p data-i18n="voice.sub"></p></div>
+        <div class="head-actions"><button class="btn btn-ghost" id="voice-rebuild" data-i18n="btn.relearn"></button></div>
       </header>
       <div id="voice-out"></div>
     </section>
 
-    <!-- USAGE -->
     <section id="tab-usage" class="tab">
       <header class="page-head">
-        <div><h1>Model usage</h1><p>Right-sized Nemotron models on Nebius Token Factory.</p></div>
+        <div><h1 data-i18n="usage.title"></h1><p data-i18n="usage.sub"></p></div>
       </header>
       <div class="tiers" id="tiers"></div>
     </section>
   </main>
 </div>
 <div id="toasts" class="toasts"></div>
+<script src="i18n.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

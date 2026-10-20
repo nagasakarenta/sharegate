@@ -17,6 +17,15 @@ app = FastAPI(title="ShareGate")
 db.init()
 
 
+@app.middleware("http")
+async def no_stale_frontend(request, call_next):
+    # The UI is three small files; always revalidate so an update never mixes old JS with new HTML.
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 def _store(convs: list[dict]) -> int:
     for c in convs:
         db.execute("INSERT OR REPLACE INTO conversations VALUES (?,?,?,?,?,?,?)",
